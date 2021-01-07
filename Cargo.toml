@@ -24,7 +24,7 @@ anyhow = "1.0.32"
 
 v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
 v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
-v_storage = { path = "../v-common-storage", version = "0.1.1" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git", version = "0.1.1" }
 v_search = { git = "https://github.com/semantic-machines/v-common-search.git" }
 v_ft_xapian = { git = "https://github.com/semantic-machines/v-common-ft-xapian.git", version = "0.1.2" }
 v_module = { git = "https://github.com/semantic-machines/v-common-module.git", version = "0.1.2" }

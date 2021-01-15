@@ -1,5 +1,5 @@
 [package]
-name = "v_v8"
+name = "v-common-v8"
 version = "0.1.3"
 authors = ["Itiua <ValeriyBushenev@gmail.com>"]
 edition = "2018"

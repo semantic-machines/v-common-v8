@@ -3,10 +3,10 @@ use std::string::ToString;
 use v_api::app::ResultCode;
 use v_api::{APIClient, IndvOp};
 use v_module::module::indv_apply_cmd;
+use v_module::remote_indv_r_storage::get_individual;
 use v_onto::individual::Individual;
 use v_onto::onto::Onto;
 use v_onto::parser::parse_raw;
-use v_module::remote_indv_r_storage::get_individual;
 
 pub struct CallbackSharedData {
     pub g_key2indv: HashMap<String, Individual>,

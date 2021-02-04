@@ -49,6 +49,7 @@ pub struct ScriptInfoContext {
     pub prevent_by_type: HashVec<String>,
     pub trigger_by_uid: HashVec<String>,
     pub run_at: String,
+    pub execute_if_src: String,
     pub disallow_changing_source: bool,
     pub is_unsafe: bool,
 }
@@ -60,6 +61,7 @@ impl Default for ScriptInfoContext {
             prevent_by_type: Default::default(),
             trigger_by_uid: Default::default(),
             run_at: "".to_string(),
+            execute_if_src: "".to_string(),
             disallow_changing_source: false,
             is_unsafe: false,
         }

@@ -12,3 +12,5 @@ pub mod scripts_workplace;
 pub mod session_cache;
 mod tokio_util;
 mod version;
+
+pub use rusty_v8;

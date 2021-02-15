@@ -7,11 +7,11 @@ use std::fs::DirEntry;
 use std::path::Path;
 use std::sync::Mutex;
 use std::{fs, io};
-use v_onto::datatype::Lang;
-use v_onto::individual::Individual;
-use v_onto::onto::Onto;
-use v_onto::resource::Value;
-use v_search::common::QueryResult;
+use v_module::v_onto::datatype::Lang;
+use v_module::v_onto::individual::Individual;
+use v_module::v_onto::onto::Onto;
+use v_module::v_onto::resource::Value;
+use v_module::v_search::common::QueryResult;
 
 pub struct HashVec<String> {
     pub hash: HashSet<String>,

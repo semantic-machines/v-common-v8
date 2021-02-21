@@ -3,7 +3,7 @@ use std::string::ToString;
 use v_module::module::indv_apply_cmd;
 use v_module::remote_indv_r_storage::get_individual;
 use v_module::v_api::app::ResultCode;
-use v_module::v_api::{APIClient, IndvOp};
+use v_module::v_api::{APIClient, IndvOp, ALL_MODULES};
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::Onto;
 use v_module::v_onto::parser::parse_raw;
@@ -181,7 +181,7 @@ pub fn commit(tnx: &Transaction, api_client: &mut APIClient) -> ResultCode {
         }
 
         debug!("commit {}", &ti.indv);
-        let res = api_client.update_with_event(&ti.ticket_id, &tnx.event_id, &tnx.src, ti.cmd.clone(), &ti.indv);
+        let res = api_client.update_use_param(&ti.ticket_id, &tnx.event_id, &tnx.src, ALL_MODULES, ti.cmd.clone(), &ti.indv);
         if res.result != ResultCode::Ok {
             error!("commit: op_id={}, code={:?}", res.op_id, res.result);
             if res.result != ResultCode::NotReady {

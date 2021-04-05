@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::string::ToString;
-use v_module::module::indv_apply_cmd;
+use v_module::veda_backend::indv_apply_cmd;
 use v_module::remote_indv_r_storage::get_individual;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::{APIClient, IndvOp, ALL_MODULES};

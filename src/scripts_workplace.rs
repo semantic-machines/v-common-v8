@@ -11,6 +11,8 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 use v_module::module::Module;
+use v_module::veda_backend::*;
+use v_module::v_storage::storage::*;
 
 pub fn script_origin<'a>(s: &mut v8::HandleScope<'a>, resource_name: v8::Local<'a, v8::String>) -> v8::ScriptOrigin<'a> {
     let resource_line_offset = 0;
@@ -66,7 +68,7 @@ impl<'a, T: Default> ScriptInfo<'a, T> {
 pub struct ScriptsWorkPlace<'a, T> {
     pub scripts: HashMap<String, ScriptInfo<'a, T>>,
     pub scripts_order: Vec<String>,
-    pub module: Module,
+    pub backend: Backend,
     pub scope: HandleScope<'a, ()>,
     pub context: Local<'a, Context>,
 }
@@ -148,7 +150,7 @@ impl<'a, T: Default> ScriptsWorkPlace<'a, T> {
         Self {
             scripts: Default::default(),
             scripts_order: vec![],
-            module: Module::default(),
+            backend: Backend::create(StorageMode::ReadOnly, false),
             scope,
             context,
         }

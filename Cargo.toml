@@ -1,6 +1,6 @@
 [package]
 name = "v-common-v8"
-version = "0.1.41"
+version = "0.1.42"
 authors = ["Itiua <ValeriyBushenev@gmail.com>"]
 edition = "2018"
 description = "common part of the veda platform"
@@ -24,5 +24,5 @@ futures = "0.3.5"
 tokio = { version = "0.2.22", features = ["full"] }
 anyhow = "1.0.32"
 
-v_module = { package = "v-common-module", version = "0.1.32" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.33" }
+v_module = { package = "v-common-module", version = "0.1.33" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.34" }

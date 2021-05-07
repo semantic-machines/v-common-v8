@@ -4,7 +4,6 @@
 //! https://chromedevtools.github.io/devtools-protocol/
 //! https://hyperandroid.com/2020/02/12/v8-inspector-from-an-embedder-standpoint/
 
-use serde_json;
 use serde_json::json;
 use serde_json::Value;
 

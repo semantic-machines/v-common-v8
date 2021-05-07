@@ -13,17 +13,23 @@ pub struct JsRuntime {
     //allocations: IsolateAllocations,
 }
 
-pub unsafe fn v8_init() {
+pub fn v8_init() {
     let platform = v8::new_default_platform().unwrap();
     v8::V8::initialize_platform(platform);
     v8::V8::initialize();
+}
+
+impl Default for JsRuntime {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl JsRuntime {
     pub fn new() -> Self {
         static DENO_INIT: Once = Once::new();
         DENO_INIT.call_once(|| {
-            unsafe { v8_init() };
+            v8_init();
         });
 
         //let global_context;

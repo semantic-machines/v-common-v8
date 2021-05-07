@@ -94,7 +94,7 @@ pub fn fn_callback_print(scope: &mut v8::HandleScope, args: v8::FunctionCallback
     for idx in 0..args.length() {
         let arg = args.get(idx);
         str_out.push_str(&arg.to_string(scope).unwrap().to_rust_string_lossy(scope));
-        str_out.push_str(" ");
+        str_out.push(' ');
     }
     info!("{}", str_out);
 }
@@ -283,7 +283,7 @@ fn get_string_arg(scope: &mut v8::HandleScope, args: &v8::FunctionCallbackArgume
     }
 
     warn!("{}", warn_msg);
-    return None;
+    None
 }
 
 fn get_string_i32(scope: &mut v8::HandleScope, args: &v8::FunctionCallbackArguments, idx: i32, err_msg: &str) -> Option<i32> {

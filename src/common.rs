@@ -419,7 +419,7 @@ pub fn collect_js_files(in_path: &str, res: &mut Vec<String>) {
     }
 }
 
-pub fn is_filter_pass(script: &ScriptInfo<ScriptInfoContext>, individual_id: &str, indv_types: &Vec<String>, onto: &mut Onto) -> bool {
+pub fn is_filter_pass(script: &ScriptInfo<ScriptInfoContext>, individual_id: &str, indv_types: &[String], onto: &mut Onto) -> bool {
     let mut is_pass = false;
 
     if !script.context.prevent_by_type.vec.is_empty() {
@@ -456,5 +456,5 @@ pub fn is_filter_pass(script: &ScriptInfo<ScriptInfoContext>, individual_id: &st
         }
     }
 
-    return is_pass;
+    is_pass
 }

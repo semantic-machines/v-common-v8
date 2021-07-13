@@ -14,8 +14,8 @@ pub struct JsRuntime {
 }
 
 pub fn v8_init() {
-    let platform = v8::new_single_threaded_default_platform().unwrap();
-    v8::V8::initialize_platform(platform);
+    assert!(v8::icu::set_common_data_69(align_data::include_aligned!(align_data::Align16, "third_party/icu/common/icudtl.dat")).is_ok());
+    v8::V8::initialize_platform(v8::new_single_threaded_default_platform(false).make_shared());
     v8::V8::initialize();
 }
 

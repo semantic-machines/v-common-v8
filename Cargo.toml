@@ -25,5 +25,5 @@ tokio = { version = "0.2.22", features = ["full"] }
 anyhow = "1.0.32"
 align-data = "0.1.0"
 
-v_module = { package = "v-common-module", version = "=0.1.46" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.48" }
+v_module = { package = "v-common-module", version = "=0.1.47" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.49" }

@@ -4,13 +4,13 @@ use rusty_v8 as v8;
 use rusty_v8::{Context, HandleScope, Local};
 use std::cell::RefCell;
 use std::sync::Mutex;
-use v_module::module::Module;
-use v_module::remote_indv_r_storage::get_individual;
-use v_module::v_api::*;
-use v_module::v_onto::individual::Individual;
-use v_module::v_onto::parser::parse_raw;
-use v_module::v_search::common::FTQuery;
-use v_module::v_search::ft_client::*;
+use v_common::module::module::Module;
+use v_common::module::remote_indv_r_storage::get_individual;
+use v_common::onto::individual::Individual;
+use v_common::onto::parser::parse_raw;
+use v_common::search::common::FTQuery;
+use v_common::search::ft_client::*;
+use v_common::v_api::api_client::IndvOp;
 
 lazy_static! {
     static ref FT_CLIENT: Mutex<RefCell<FTClient>> = Mutex::new(RefCell::new(FTClient::new(Module::get_property("ft_query_service_url").unwrap_or_default())));

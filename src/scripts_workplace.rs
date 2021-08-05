@@ -10,9 +10,9 @@ use std::fs;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-use v_module::module::Module;
-use v_module::v_storage::storage::*;
-use v_module::veda_backend::*;
+use v_common::module::module::Module;
+use v_common::module::veda_backend::Backend;
+use v_common::storage::storage::StorageMode;
 
 pub fn script_origin<'a>(s: &mut v8::HandleScope<'a>, resource_name: v8::Local<'a, v8::String>) -> v8::ScriptOrigin<'a> {
     let resource_line_offset = 0;

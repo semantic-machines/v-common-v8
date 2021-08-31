@@ -6,7 +6,7 @@ use v_common::module::veda_backend::indv_apply_cmd;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;
 use v_common::onto::parser::parse_raw;
-use v_common::v_api::api_client::{APIClient, IndvOp, ALL_MODULES};
+use v_common::v_api::api_client::{IndvOp, ALL_MODULES, MStorageClient};
 use v_common::v_api::obj::ResultCode;
 
 pub struct CallbackSharedData {
@@ -166,7 +166,7 @@ impl Transaction {
     }
 }
 
-pub fn commit(tnx: &Transaction, api_client: &mut APIClient) -> ResultCode {
+pub fn commit(tnx: &Transaction, api_client: &mut MStorageClient) -> ResultCode {
     for ti in tnx.queue.iter() {
         if ti.cmd == IndvOp::Remove && ti.indv.get_id().is_empty() {
             continue;

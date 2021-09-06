@@ -182,11 +182,15 @@ pub fn commit(tnx: &Transaction, api_client: &mut MStorageClient) -> ResultCode 
         }
 
         debug!("commit {}", &ti.indv);
-        let res = api_client.update_use_param(&ti.ticket_id, &tnx.event_id, &tnx.src, ALL_MODULES, ti.cmd.clone(), &ti.indv);
-        if res.result != ResultCode::Ok {
-            error!("commit: op_id={}, code={:?}", res.op_id, res.result);
-            if res.result != ResultCode::NotReady {
-                return res.result;
+        match api_client.update_use_param(&ti.ticket_id, &tnx.event_id, &tnx.src, ALL_MODULES, ti.cmd.clone(), &ti.indv) {
+            Ok(res) => {
+                if res.result != ResultCode::Ok {
+                    error!("commit: op_id={}, code={:?}", res.op_id, res.result);
+                    return res.result;
+                }
+            }
+            Err(e) => {
+                return e.result;
             }
         }
     }

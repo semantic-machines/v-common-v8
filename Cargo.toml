@@ -25,5 +25,5 @@ tokio = { version = "0.2.22", features = ["full"] }
 anyhow = "1.0.32"
 align-data = "0.1.0"
 
-v_common = { package = "v-common", version = "=0.1.62" }
+v_common = { package = "v-common", version = "=0.1.64" }
 #v_common = { package = "v-common", path = "../v-common" }

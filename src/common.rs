@@ -173,7 +173,10 @@ fn add_v8_value_obj_to_individual<'a>(
                 }
             }
             "Integer" => {
-                if vdata.is_number() {
+                if vdata.is_big_int() {
+                    let (i64val, _is_truncate) = vdata.to_big_int(scope).unwrap().i64_value();
+                    res.add_integer(&predicate, i64val);
+                } else if vdata.is_number() {
                     res.add_integer(&predicate, vdata.integer_value(scope).unwrap());
                 } else if vdata.is_string() {
                     if let Some(v) = vdata.to_string(scope) {
@@ -296,11 +299,11 @@ pub fn individual2v8obj<'a>(scope: &mut HandleScope<'a>, src: &mut Individual) -
                     set_key_str_value(scope, &mut v8_value, "type", "Decimal");
                 }
                 Value::Int(i) => {
-                    if *i < i32::max as i64 {
-                        set_key_i32_value(scope, &mut v8_value, "data", *i as i32);
+                    let i_val = *i;
+                    if i_val < i32::MAX as i64 {
+                        set_key_i32_value(scope, &mut v8_value, "data", i_val as i32);
                     } else {
-                        set_key_i64_value(scope, &mut v8_value, "data", *i as i64);
-                        //                        error!("individual2v8obj: predicate{}, {} > i32.max", predicate, i);
+                        set_key_i64_value(scope, &mut v8_value, "data", i_val);
                     }
                     set_key_str_value(scope, &mut v8_value, "type", "Integer");
                 }

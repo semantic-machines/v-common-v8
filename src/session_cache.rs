@@ -6,7 +6,7 @@ use v_common::module::veda_backend::indv_apply_cmd;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;
 use v_common::onto::parser::parse_raw;
-use v_common::v_api::api_client::{IndvOp, ALL_MODULES, MStorageClient};
+use v_common::v_api::api_client::{IndvOp, MStorageClient, ALL_MODULES};
 use v_common::v_api::obj::ResultCode;
 
 pub struct CallbackSharedData {

@@ -299,7 +299,7 @@ pub fn individual2v8obj<'a>(scope: &mut HandleScope<'a>, src: &mut Individual) -
                     if *i < i32::max as i64 {
                         set_key_i32_value(scope, &mut v8_value, "data", *i as i32);
                     } else {
-                        set_key_f64_value(scope, &mut v8_value, "data", *i as f64);
+                        set_key_i64_value(scope, &mut v8_value, "data", *i as i64);
                         //                        error!("individual2v8obj: predicate{}, {} > i32.max", predicate, i);
                     }
                     set_key_str_value(scope, &mut v8_value, "type", "Integer");
@@ -350,6 +350,12 @@ fn set_key_bool_value(scope: &mut HandleScope, v8_obj: &mut v8::Local<v8::Object
 fn set_key_i32_value(scope: &mut HandleScope, v8_obj: &mut v8::Local<v8::Object>, key: &str, val: i32) {
     let v8_key = str_2_v8(scope, key).into();
     let v8_val = v8::Integer::new(scope, val).into();
+    v8_obj.set(scope, v8_key, v8_val);
+}
+
+fn set_key_i64_value(scope: &mut HandleScope, v8_obj: &mut v8::Local<v8::Object>, key: &str, val: i64) {
+    let v8_key = str_2_v8(scope, key).into();
+    let v8_val = v8::BigInt::new_from_i64(scope, val).into();
     v8_obj.set(scope, v8_key, v8_val);
 }
 

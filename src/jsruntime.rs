@@ -1,7 +1,7 @@
-use rusty_v8 as v8;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Once;
+use v8;
 
 pub struct JsRuntime {
     // This is an Option<OwnedIsolate> instead of just OwnedIsolate to workaround

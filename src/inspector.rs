@@ -7,7 +7,7 @@
 use serde_json::json;
 use serde_json::Value;
 
-use rusty_v8 as v8;
+use v8;
 
 use futures::channel::mpsc;
 use futures::channel::mpsc::UnboundedReceiver;
@@ -173,7 +173,7 @@ async fn server(host: SocketAddr, register_inspector_rx: UnboundedReceiver<Inspe
         warp::reply::json(&json!({
           "Browser": format!("Deno/{}", crate::version::DENO),
           "Protocol-Version": "1.3",
-          "V8-Version": crate::version::v8(),
+          "V8-Version": crate::version::ver_v8(),
         }))
     });
 

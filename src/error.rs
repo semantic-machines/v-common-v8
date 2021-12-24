@@ -1,6 +1,4 @@
 // Copyright 2018-2020 the Deno authors. All rights reserved. MIT license.
-
-use rusty_v8 as v8;
 use std::borrow::Cow;
 use std::convert::TryFrom;
 use std::convert::TryInto;
@@ -10,6 +8,7 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::io;
+use v8;
 
 /// A generic wrapper that can encapsulate any concrete error type.
 pub type AnyError = anyhow::Error;

@@ -1,12 +1,11 @@
 use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::Decimal;
-use rusty_v8 as v8;
-use rusty_v8::HandleScope;
 use std::collections::HashSet;
 use std::fs::DirEntry;
 use std::path::Path;
 use std::sync::Mutex;
 use std::{fs, io};
+use v8::HandleScope;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;

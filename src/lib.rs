@@ -13,5 +13,5 @@ pub mod session_cache;
 mod tokio_util;
 mod version;
 
-pub use rusty_v8;
+pub use v8;
 pub use v_common;

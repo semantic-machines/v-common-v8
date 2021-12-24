@@ -1,9 +1,8 @@
 use crate::common::*;
 use crate::session_cache::*;
-use rusty_v8 as v8;
-use rusty_v8::{Context, HandleScope, Local};
 use std::cell::RefCell;
 use std::sync::Mutex;
+use v8::{Context, HandleScope, Local};
 use v_common::module::module::Module;
 use v_common::module::remote_indv_r_storage::get_individual;
 use v_common::onto::individual::Individual;

@@ -188,10 +188,10 @@ pub fn commit(tnx: &Transaction, api_client: &mut MStorageClient) -> ResultCode 
                     error!("commit: op_id={}, code={:?}", res.op_id, res.result);
                     return res.result;
                 }
-            }
+            },
             Err(e) => {
                 return e.result;
-            }
+            },
         }
     }
 

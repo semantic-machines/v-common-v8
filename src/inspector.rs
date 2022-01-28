@@ -439,7 +439,7 @@ impl DenoInspector {
                             let session = sessions.handshake.take().unwrap();
                             sessions.established.push(session);
                             take(&mut self.flags.borrow_mut().waiting_for_session);
-                        }
+                        },
                         Poll::Ready(_) => sessions.handshake = None,
                         Poll::Pending => break,
                     };
@@ -451,9 +451,9 @@ impl DenoInspector {
                         let prev = sessions.handshake.replace(session);
                         assert!(prev.is_none());
                         continue;
-                    }
-                    Poll::Ready(None) => {}
-                    Poll::Pending => {}
+                    },
+                    Poll::Ready(None) => {},
+                    Poll::Pending => {},
                 }
 
                 // Poll established sessions.
@@ -472,7 +472,7 @@ impl DenoInspector {
                         // The inspector was woken while the session handler was being
                         // polled, so we poll it another time.
                         w.poll_state = PollState::Polling;
-                    }
+                    },
                     PollState::Polling if !should_block => {
                         // The session handler doesn't need to be polled any longer, and
                         // there's no reason to block (execution is not paused), so this
@@ -486,7 +486,7 @@ impl DenoInspector {
                         // Register the address of the inspector, which allows the waker
                         // to request an interrupt from the isolate.
                         w.inspector_ptr = NonNull::new(self as *const _ as *mut Self);
-                    }
+                    },
                     PollState::Polling if should_block => {
                         // Isolate execution has been paused but there are no more
                         // events to process, so this thread will be parked. Therefore,
@@ -494,14 +494,14 @@ impl DenoInspector {
                         // which thread to unpark when new events arrive.
                         w.poll_state = PollState::Parked;
                         w.parked_thread.replace(thread::current());
-                    }
+                    },
                     _ => unreachable!(),
                 };
                 w.poll_state
             });
             match new_state {
                 PollState::Idle => break Ok(Poll::Pending), // Yield to task.
-                PollState::Polling => {}                    // Poll the session handler again.
+                PollState::Polling => {},                   // Poll the session handler again.
                 PollState::Parked => thread::park(),        // Park the thread.
                 _ => unreachable!(),
             };
@@ -518,7 +518,7 @@ impl DenoInspector {
                 None => {
                     self.flags.get_mut().waiting_for_session = true;
                     let _ = self.poll_sessions(None).unwrap();
-                }
+                },
             };
         }
     }
@@ -616,14 +616,14 @@ impl task::ArcWake for InspectorWaker {
                         let inspector = unsafe { &*(arg as *mut DenoInspector) };
                         let _ = inspector.poll_sessions(None);
                     }
-                }
+                },
                 PollState::Parked => {
                     // Unpark the isolate thread.
                     let parked_thread = w.parked_thread.take().unwrap();
                     assert_ne!(parked_thread.id(), thread::current().id());
                     parked_thread.unpark();
-                }
-                _ => {}
+                },
+                _ => {},
             };
             w.poll_state = PollState::Woken;
         });

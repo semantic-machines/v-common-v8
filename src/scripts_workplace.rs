@@ -55,11 +55,11 @@ impl<'a, T: Default> ScriptInfo<'a, T> {
         match v8::Script::compile(parent_scope, source, Some(&origin)) {
             Some(script) => {
                 self.compiled_script = Some(script);
-            }
+            },
             None => {
                 error!("fail compile script {}", self.str_script);
                 self.compiled_script = None;
-            }
+            },
         }
     }
 }
@@ -103,11 +103,11 @@ impl<'a, T: Default> ScriptsWorkPlace<'a, T> {
                                     } else {
                                         collect_js_files(&(path.to_string() + &file_name), &mut o_files);
                                     }
-                                }
+                                },
                                 Err(e) => error!("{:?}", e),
                             }
                         }
-                    }
+                    },
                     Err(e) => error!("{:?}", e),
                 }
             } else {
@@ -136,7 +136,7 @@ impl<'a, T: Default> ScriptsWorkPlace<'a, T> {
                     }
 
                     //self.scripts.insert(x.to_owned(), scr_inf);
-                }
+                },
                 Err(e) => error!("{:?}", e),
             }
         }

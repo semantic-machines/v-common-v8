@@ -1,4 +1,4 @@
-use rust_decimal::prelude::ToPrimitive;
+//use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::Decimal;
 use std::collections::HashSet;
 use std::fs::DirEntry;
@@ -170,7 +170,7 @@ fn add_v8_value_obj_to_individual<'a>(
                 } else {
                     error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
                 }
-            }
+            },
             "Integer" => {
                 if vdata.is_big_int() {
                     let (i64val, _is_truncate) = vdata.to_big_int(scope).unwrap().i64_value();
@@ -189,7 +189,7 @@ fn add_v8_value_obj_to_individual<'a>(
                 } else {
                     error!("v8obj2individual: invalid string in Integer");
                 }
-            }
+            },
             "Datetime" => {
                 if vdata.is_number() {
                     if let Some(v) = vdata.to_integer(scope) {
@@ -208,14 +208,14 @@ fn add_v8_value_obj_to_individual<'a>(
                 } else {
                     error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
                 }
-            }
+            },
             "Boolean" => {
                 if vdata.is_boolean() {
                     res.add_bool(&predicate, vdata.to_integer(scope).unwrap().value() != 0);
                 } else {
                     error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
                 }
-            }
+            },
             "String" => {
                 let lang = if let Some(vlang) = resource.get(scope, lang_key.into()) {
                     Lang::new_from_str(&v8_2_str(scope, &vlang).to_lowercase())
@@ -225,14 +225,14 @@ fn add_v8_value_obj_to_individual<'a>(
 
                 let sdata = v8_2_str(scope, &vdata);
                 res.add_string(&predicate, &sdata, lang);
-            }
+            },
             "Uri" => {
                 let sdata = v8_2_str(scope, &vdata);
                 res.add_uri(&predicate, &sdata);
-            }
+            },
             _ => {
                 error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
-            }
+            },
         }
     } else {
         error!("v8obj2individual: type is not string, predicate[{}]", predicate);
@@ -294,9 +294,9 @@ pub fn individual2v8obj<'a>(scope: &mut HandleScope<'a>, src: &mut Individual) -
 
                     let d = Decimal::new(num, scale);
 
-                    set_key_f64_value(scope, &mut v8_value, "data", d.to_f64().unwrap_or_default());
+                    set_key_str_value(scope, &mut v8_value, "data", &d.to_string());
                     set_key_str_value(scope, &mut v8_value, "type", "Decimal");
-                }
+                },
                 Value::Int(i) => {
                     let i_val = *i;
                     if i_val < i32::MAX as i64 {
@@ -305,28 +305,28 @@ pub fn individual2v8obj<'a>(scope: &mut HandleScope<'a>, src: &mut Individual) -
                         set_key_i64_value(scope, &mut v8_value, "data", i_val);
                     }
                     set_key_str_value(scope, &mut v8_value, "type", "Integer");
-                }
+                },
                 Value::Datetime(i) => {
                     let dt = *i;
                     set_key_date_value(scope, &mut v8_value, "data", dt);
                     set_key_str_value(scope, &mut v8_value, "type", "Datetime");
-                }
+                },
                 Value::Bool(b) => {
                     set_key_bool_value(scope, &mut v8_value, "data", *b);
                     set_key_str_value(scope, &mut v8_value, "type", "Boolean");
-                }
+                },
                 Value::Str(s, l) => {
                     if *l != Lang::NONE {
                         set_key_str_value(scope, &mut v8_value, "lang", &l.to_string().to_uppercase());
                     }
                     set_key_str_value(scope, &mut v8_value, "data", s);
                     set_key_str_value(scope, &mut v8_value, "type", "String");
-                }
+                },
                 Value::Uri(s) => {
                     set_key_str_value(scope, &mut v8_value, "data", s);
                     set_key_str_value(scope, &mut v8_value, "type", "Uri");
-                }
-                _ => {}
+                },
+                _ => {},
             }
         }
 
@@ -361,12 +361,13 @@ fn set_key_i64_value(scope: &mut HandleScope, v8_obj: &mut v8::Local<v8::Object>
     v8_obj.set(scope, v8_key, v8_val);
 }
 
+/*
 fn set_key_f64_value(scope: &mut HandleScope, v8_obj: &mut v8::Local<v8::Object>, key: &str, val: f64) {
     let v8_key = str_2_v8(scope, key).into();
     let v8_val = v8::Number::new(scope, val).into();
     v8_obj.set(scope, v8_key, v8_val);
 }
-
+*/
 fn set_key_date_value(scope: &mut HandleScope, v8_obj: &mut v8::Local<v8::Object>, key: &str, val: i64) {
     let v8_key = str_2_v8(scope, key).into();
     if let Some(v8_val) = v8::Date::new(scope, (val * 1000) as f64) {

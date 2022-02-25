@@ -3,7 +3,7 @@ use crate::session_cache::*;
 use std::cell::RefCell;
 use std::sync::Mutex;
 use v8::{Context, HandleScope, Local};
-use v_common::module::module::Module;
+use v_common::module::module_impl::Module;
 use v_common::module::remote_indv_r_storage::get_individual;
 use v_common::onto::individual::Individual;
 use v_common::onto::parser::parse_raw;

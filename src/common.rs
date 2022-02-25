@@ -8,7 +8,7 @@ use std::{fs, io};
 use v8::HandleScope;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
-use v_common::onto::onto::Onto;
+use v_common::onto::onto_impl::Onto;
 use v_common::onto::resource::Value;
 use v_common::search::common::QueryResult;
 

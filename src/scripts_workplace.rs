@@ -9,7 +9,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 use v8::{Context, HandleScope, Isolate, Local};
-use v_common::module::module::Module;
+use v_common::module::module_impl::Module;
 use v_common::module::veda_backend::Backend;
 use v_common::storage::common::StorageMode;
 

@@ -88,7 +88,7 @@ pub fn v8obj2individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<'a, v
     res
 }
 
-pub fn v8obj_into_individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<'a, v8::Object>, mut res: &mut Individual) {
+pub fn v8obj_into_individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<'a, v8::Object>, res: &mut Individual) {
     let data_key = str_2_v8(scope, "data");
     let type_key = str_2_v8(scope, "type");
     let lang_key = str_2_v8(scope, "lang");
@@ -108,7 +108,7 @@ pub fn v8obj_into_individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<
                 }
                 if let Some(resources) = val.to_object(scope) {
                     if !resources.is_array() {
-                        add_v8_value_obj_to_individual(scope, &predicate, resources, &mut res, data_key, type_key, lang_key);
+                        add_v8_value_obj_to_individual(scope, &predicate, resources, res, data_key, type_key, lang_key);
                     } else if let Some(key_list) = resources.get_property_names(scope) {
                         for resources_idx in 0..key_list.length() {
                             let j_resources_idx = v8::Integer::new(scope, resources_idx as i32);
@@ -118,11 +118,11 @@ pub fn v8obj_into_individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<
                                         let idx_0 = v8::Integer::new(scope, 0);
                                         if let Some(v) = resource.get(scope, idx_0.into()) {
                                             if let Some(resource) = v.to_object(scope) {
-                                                add_v8_value_obj_to_individual(scope, &predicate, resource, &mut res, data_key, type_key, lang_key);
+                                                add_v8_value_obj_to_individual(scope, &predicate, resource, res, data_key, type_key, lang_key);
                                             }
                                         }
                                     } else {
-                                        add_v8_value_obj_to_individual(scope, &predicate, resource, &mut res, data_key, type_key, lang_key);
+                                        add_v8_value_obj_to_individual(scope, &predicate, resource, res, data_key, type_key, lang_key);
                                     }
                                 } else {
                                     error!("v8obj2individual: invalid value predicate[{}], idx={}", predicate, resources_idx);
@@ -157,15 +157,15 @@ fn add_v8_value_obj_to_individual<'a>(
             "Decimal" => {
                 if vdata.is_number() && !vdata.is_int32() && !vdata.is_big_int() {
                     if let Some(v) = vdata.to_number(scope) {
-                        res.add_decimal_from_f64(&predicate, v.value());
+                        res.add_decimal_from_f64(predicate, v.value());
                     }
                 } else if vdata.is_int32() || vdata.is_big_int() {
                     if let Some(v) = vdata.to_integer(scope) {
-                        res.add_decimal_from_i64(&predicate, v.value());
+                        res.add_decimal_from_i64(predicate, v.value());
                     }
                 } else if vdata.is_string() {
                     if let Some(v) = vdata.to_string(scope) {
-                        res.add_decimal_from_str(&predicate, &v.to_rust_string_lossy(scope));
+                        res.add_decimal_from_str(predicate, &v.to_rust_string_lossy(scope));
                     }
                 } else {
                     error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
@@ -174,14 +174,14 @@ fn add_v8_value_obj_to_individual<'a>(
             "Integer" => {
                 if vdata.is_big_int() {
                     let (i64val, _is_truncate) = vdata.to_big_int(scope).unwrap().i64_value();
-                    res.add_integer(&predicate, i64val);
+                    res.add_integer(predicate, i64val);
                 } else if vdata.is_number() {
-                    res.add_integer(&predicate, vdata.integer_value(scope).unwrap());
+                    res.add_integer(predicate, vdata.integer_value(scope).unwrap());
                 } else if vdata.is_string() {
                     if let Some(v) = vdata.to_string(scope) {
                         let sv = v.to_rust_string_lossy(scope);
                         if let Ok(i) = sv.parse::<i64>() {
-                            res.add_integer(&predicate, i);
+                            res.add_integer(predicate, i);
                         } else {
                             error!("v8obj2individual: fail convert {} to int", sv);
                         }
@@ -193,15 +193,15 @@ fn add_v8_value_obj_to_individual<'a>(
             "Datetime" => {
                 if vdata.is_number() {
                     if let Some(v) = vdata.to_integer(scope) {
-                        res.add_datetime(&predicate, v.value() / 1000);
+                        res.add_datetime(predicate, v.value() / 1000);
                     } else {
                         error!("v8obj2individual: invalid number content of [{}], field [{}]", stype, predicate);
                     }
                 } else if vdata.is_string() {
-                    res.add_datetime_from_str(&predicate, &v8_2_str(scope, &vdata));
+                    res.add_datetime_from_str(predicate, &v8_2_str(scope, &vdata));
                 } else if vdata.is_date() {
                     if let Some(v) = vdata.to_integer(scope) {
-                        res.add_datetime(&predicate, v.value() / 1000);
+                        res.add_datetime(predicate, v.value() / 1000);
                     } else {
                         error!("v8obj2individual: invalid date content of [{}], field [{}]", stype, predicate);
                     }
@@ -211,7 +211,7 @@ fn add_v8_value_obj_to_individual<'a>(
             },
             "Boolean" => {
                 if vdata.is_boolean() {
-                    res.add_bool(&predicate, vdata.to_integer(scope).unwrap().value() != 0);
+                    res.add_bool(predicate, vdata.to_integer(scope).unwrap().value() != 0);
                 } else {
                     error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
                 }
@@ -224,11 +224,11 @@ fn add_v8_value_obj_to_individual<'a>(
                 };
 
                 let sdata = v8_2_str(scope, &vdata);
-                res.add_string(&predicate, &sdata, lang);
+                res.add_string(predicate, &sdata, lang);
             },
             "Uri" => {
                 let sdata = v8_2_str(scope, &vdata);
-                res.add_uri(&predicate, &sdata);
+                res.add_uri(predicate, &sdata);
             },
             _ => {
                 error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);

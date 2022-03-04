@@ -151,7 +151,7 @@ impl JsError {
 
         let (message, frames, stack) = if exception.is_native_error() {
             // The exception is a JS Error object.
-            let exception: v8::Local<v8::Object> = exception.clone().try_into().unwrap();
+            let exception: v8::Local<v8::Object> = exception.try_into().unwrap();
 
             // Get the message by formatting error.name and error.message.
             let name = get_property(scope, exception, "name")

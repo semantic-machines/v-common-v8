@@ -1,4 +1,3 @@
-use v8;
 // Copyright 2018-2020 the Deno authors. All rights reserved. MIT license.
 
 pub const DENO: &str = env!("CARGO_PKG_VERSION");

@@ -9,18 +9,10 @@ use v_common::onto::parser::parse_raw;
 use v_common::v_api::api_client::{IndvOp, MStorageClient, ALL_MODULES};
 use v_common::v_api::obj::ResultCode;
 
+#[derive(Default)]
 pub struct CallbackSharedData {
     pub g_key2indv: HashMap<String, Individual>,
     pub g_key2attr: HashMap<String, String>,
-}
-
-impl Default for CallbackSharedData {
-    fn default() -> Self {
-        Self {
-            g_key2indv: Default::default(),
-            g_key2attr: Default::default(),
-        }
-    }
 }
 
 impl CallbackSharedData {
@@ -132,10 +124,10 @@ impl Transaction {
             ti.uri = ti.indv.get_id().to_string();
 
             if ti.cmd == IndvOp::AddTo || ti.cmd == IndvOp::SetIn || ti.cmd == IndvOp::RemoveFrom {
-                if let Some(mut prev_indv) = self.get_indv(ti.indv.get_id()) {
+                if let Some(prev_indv) = self.get_indv(ti.indv.get_id()) {
                     debug!("{:?} BEFORE: {}", ti.cmd, &prev_indv);
                     debug!("{:?} APPLY: {}", ti.cmd, &ti.indv);
-                    indv_apply_cmd(&ti.cmd, &mut prev_indv, &mut ti.indv);
+                    indv_apply_cmd(&ti.cmd, prev_indv, &mut ti.indv);
                     debug!("{:?} AFTER: {}", ti.cmd, &prev_indv);
                     ti.indv = Individual::new_from_obj(prev_indv.get_obj());
                 } else if let Some(mut prev_indv) = get_individual(ti.indv.get_id()) {

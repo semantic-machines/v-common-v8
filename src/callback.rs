@@ -40,7 +40,7 @@ pub fn fn_callback_get_individual(scope: &mut v8::HandleScope, args: v8::Functio
             rv.set(j_indv.into());
         } else if let Some(mut indv) = get_individual(&id) {
             if parse_raw(&mut indv).is_ok() {
-                let j_indv = individual2v8obj(scope, &mut indv.parse_all());
+                let j_indv = individual2v8obj(scope, indv.parse_all());
                 rv.set(j_indv.into());
             } else {
                 error!("callback_get_individual: fail parse binobj, id={}", id);
@@ -71,7 +71,7 @@ pub fn fn_callback_get_individuals(scope: &mut v8::HandleScope, args: v8::Functi
                         j_res.set(scope, j_idx.into(), j_indv.into());
                     } else if let Some(mut indv) = get_individual(&id) {
                         if parse_raw(&mut indv).is_ok() {
-                            let j_indv = individual2v8obj(scope, &mut indv.parse_all());
+                            let j_indv = individual2v8obj(scope, indv.parse_all());
                             j_res.set(scope, j_idx.into(), j_indv.into());
                         } else {
                             error!("callback_get_individual: fail parse binobj, id={}", id);
@@ -125,9 +125,9 @@ pub fn fn_callback_get_env_num_var(scope: &mut v8::HandleScope, args: v8::Functi
 
         debug!("fn_callback_get_env_num_var, var_name={:?}", var_name);
 
-        if var_name == "$queue_elements_count" || var_name == "$queue_elements_processed" {
-            return;
-        }
+        //if var_name == "$queue_elements_count" || var_name == "$queue_elements_processed" {
+        //    return;
+        //}
     }
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "v-common-v8"
-version = "0.1.95"
+version = "0.1.96"
 authors = ["Itiua <ValeriyBushenev@gmail.com>"]
 edition = "2018"
 description = "common part of the veda platform"
@@ -25,5 +25,5 @@ tokio = { version = "0.2", features = ["full"] }
 anyhow = "1.0.32"
 align-data = "0.1.0"
 
-v_common = { package = "v-common", version = "=0.2.1" }
+v_common = { package = "v-common", version = "=0.2.9" }
 #v_common = { package = "v-common", path = "../v-common" }

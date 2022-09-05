@@ -22,14 +22,14 @@ impl CallbackSharedData {
         if !event_id.is_empty() {
             let mut aa: Vec<&str> = event_id.split(';').collect();
             if !aa.is_empty() {
-                event_id = aa.get(0).unwrap();
+                event_id = aa.first().unwrap();
             }
 
             aa = event_id.split('+').collect();
 
             if aa.len() >= 2 {
                 self.g_key2attr.insert("$parent_script_id".to_owned(), aa.get(1).unwrap().to_string());
-                self.g_key2attr.insert("$parent_document_id".to_owned(), aa.get(0).unwrap().to_string());
+                self.g_key2attr.insert("$parent_document_id".to_owned(), aa.first().unwrap().to_string());
             } else {
                 self.g_key2attr.insert("$parent_script_id".to_owned(), String::default());
                 self.g_key2attr.insert("$parent_document_id".to_owned(), String::default());

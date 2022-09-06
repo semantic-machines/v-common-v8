@@ -3,6 +3,7 @@ use crate::session_cache::*;
 use std::cell::RefCell;
 use std::sync::Mutex;
 use v8::{Context, HandleScope, Local};
+use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module_impl::Module;
 use v_common::module::remote_indv_r_storage::get_individual;
 use v_common::onto::individual::Individual;
@@ -10,11 +11,37 @@ use v_common::onto::parser::parse_raw;
 use v_common::search::common::FTQuery;
 use v_common::search::ft_client::*;
 use v_common::v_api::api_client::IndvOp;
+use v_common::v_authorization::common::{Access, AuthorizationContext, ACCESS_8_LIST, ACCESS_PREDICATE_LIST};
 
 lazy_static! {
+    static ref AZ: Mutex<RefCell<LmdbAzContext>> = Mutex::new(RefCell::new(LmdbAzContext::new(1000)));
     static ref FT_CLIENT: Mutex<RefCell<FTClient>> = Mutex::new(RefCell::new(FTClient::new(Module::get_property("ft_query_service_url").unwrap_or_default())));
     pub static ref G_VARS: Mutex<RefCell<CallbackSharedData>> = Mutex::new(RefCell::new(CallbackSharedData::default()));
     pub static ref G_TRANSACTION: Mutex<RefCell<Transaction>> = Mutex::new(RefCell::new(Transaction::default()));
+}
+
+pub fn fn_callback_get_rights(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut rv: v8::ReturnValue) {
+    //let ticket = get_string_arg(scope, &args, 0, "callback_get_rights: ticket not found or invalid").unwrap_or_default();
+    let id = get_string_arg(scope, &args, 1, "callback_get_rights: id not found or invalid").unwrap_or_default();
+    let user_id = get_string_arg(scope, &args, 2, "callback_get_rights: user_id not found or invalid").unwrap_or_default();
+
+    let mut sh_az = AZ.lock().unwrap();
+    let az = sh_az.get_mut();
+
+    let rights = az.authorize(&id, &user_id, Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8, false).unwrap_or(0);
+
+    let mut pstm = Individual::default();
+    pstm.set_id("_");
+    pstm.add_uri("rdf:type", "v-s:PermissionStatement");
+    for ch_access in ACCESS_8_LIST {
+        if rights & ch_access > 0 {
+            pstm.add_bool(ACCESS_PREDICATE_LIST[ch_access as usize], rights & ch_access > 0);
+        }
+    }
+    let j_indv = individual2v8obj(scope, pstm.parse_all());
+    rv.set(j_indv.into());
+
+    drop(sh_az);
 }
 
 pub fn fn_callback_get_individual(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut rv: v8::ReturnValue) {
@@ -268,6 +295,7 @@ pub fn init_context_with_callback<'a>(scope: &mut HandleScope<'a, ()>) -> Local<
     object_templ.set(str_2_v8(scope, "set_in_individual").into(), v8::FunctionTemplate::new(scope, fn_callback_set_in_individual).into());
     object_templ.set(str_2_v8(scope, "remove_from_individual").into(), v8::FunctionTemplate::new(scope, fn_callback_remove_from_individual).into());
     object_templ.set(str_2_v8(scope, "log_trace").into(), v8::FunctionTemplate::new(scope, fn_callback_log_trace).into());
+    object_templ.set(str_2_v8(scope, "get_rights").into(), v8::FunctionTemplate::new(scope, fn_callback_get_rights).into());
 
     v8::Context::new_from_template(scope, object_templ)
 }

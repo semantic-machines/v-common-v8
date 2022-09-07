@@ -219,9 +219,9 @@ fn add_v8_value_obj_to_individual<'a>(
             },
             "String" => {
                 let lang = if let Some(vlang) = resource.get(scope, lang_key.into()) {
-                    Lang::new_from_str(&v8_2_str(scope, &vlang).to_lowercase())
+                    Lang::new_from_str(&v8_2_str(scope, &vlang))
                 } else {
-                    Lang::NONE
+                    Lang::none()
                 };
 
                 let sdata = v8_2_str(scope, &vdata);
@@ -317,7 +317,7 @@ pub fn individual2v8obj<'a>(scope: &mut HandleScope<'a>, src: &mut Individual) -
                     set_key_str_value(scope, &mut v8_value, "type", "Boolean");
                 },
                 Value::Str(s, l) => {
-                    if *l != Lang::NONE {
+                    if l.is_some() {
                         set_key_str_value(scope, &mut v8_value, "lang", &l.to_string().to_uppercase());
                     }
                     set_key_str_value(scope, &mut v8_value, "data", s);

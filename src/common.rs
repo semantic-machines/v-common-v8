@@ -219,7 +219,7 @@ fn add_v8_value_obj_to_individual<'a>(
             },
             "String" => {
                 let lang = if let Some(vlang) = resource.get(scope, lang_key.into()) {
-                    Lang::new_from_str(&v8_2_str(scope, &vlang))
+                    Lang::new_from_str(&v8_2_str(scope, &vlang).to_lowercase())
                 } else {
                     Lang::none()
                 };

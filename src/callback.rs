@@ -22,8 +22,16 @@ lazy_static! {
 
 pub fn fn_callback_get_rights(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut rv: v8::ReturnValue) {
     //let ticket = get_string_arg(scope, &args, 0, "callback_get_rights: ticket not found or invalid").unwrap_or_default();
-    let id = get_string_arg(scope, &args, 1, "callback_get_rights: id not found or invalid").unwrap_or_default();
-    let user_id = get_string_arg(scope, &args, 2, "callback_get_rights: user_id not found or invalid").unwrap_or_default();
+    let id = get_string_arg(scope, &args, 1, None).unwrap_or_default();
+    let user_id = if let Some(u) = get_string_arg(scope, &args, 2, None) {
+        u
+    } else {
+        let key = v8::String::new(scope, "user_uri").unwrap();
+        let user_uri = scope.get_current_context().global(scope).get(scope, key.into()).unwrap().to_string(scope).unwrap();
+        user_uri.to_rust_string_lossy(scope)
+    };
+
+    debug!("user_id={}, doc_id={}", user_id, id);
 
     let mut sh_az = AZ.lock().unwrap();
     let az = sh_az.get_mut();
@@ -46,7 +54,7 @@ pub fn fn_callback_get_rights(scope: &mut v8::HandleScope, args: v8::FunctionCal
 
 pub fn fn_callback_get_individual(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut rv: v8::ReturnValue) {
     //let ticket = get_string_arg(&mut scope, &args, 0, "callback_get_individual: ticket not found or invalid").unwrap_or_default();
-    let id = get_string_arg(scope, &args, 1, "callback_get_individual: id not found or invalid").unwrap_or_default();
+    let id = get_string_arg(scope, &args, 1, Some("callback_get_individual: id not found or invalid")).unwrap_or_default();
 
     if id == "undefined" {
     } else if id.starts_with('$') {
@@ -131,7 +139,7 @@ pub fn fn_callback_log_trace(scope: &mut v8::HandleScope, args: v8::FunctionCall
 }
 
 pub fn fn_callback_get_env_str_var(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut rv: v8::ReturnValue) {
-    if let Some(var_name) = get_string_arg(scope, &args, 0, "fn_callback_get_env_str_var: arg not found or invalid") {
+    if let Some(var_name) = get_string_arg(scope, &args, 0, Some("fn_callback_get_env_str_var: arg not found or invalid")) {
         let mut sh_g_vars = G_VARS.lock().unwrap();
         let g_vars = sh_g_vars.get_mut();
 
@@ -146,7 +154,7 @@ pub fn fn_callback_get_env_str_var(scope: &mut v8::HandleScope, args: v8::Functi
     }
 }
 pub fn fn_callback_get_env_num_var(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut _rv: v8::ReturnValue) {
-    if let Some(var_name) = get_string_arg(scope, &args, 0, "fn_callback_get_env_str_var: arg not found or invalid") {
+    if let Some(var_name) = get_string_arg(scope, &args, 0, Some("fn_callback_get_env_str_var: arg not found or invalid")) {
         //let mut sh_g_vars = G_VARS.lock().unwrap();
         //let _g_vars = sh_g_vars.get_mut();
 
@@ -159,13 +167,13 @@ pub fn fn_callback_get_env_num_var(scope: &mut v8::HandleScope, args: v8::Functi
 }
 
 pub fn fn_callback_query(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut rv: v8::ReturnValue) {
-    let ticket = get_string_arg(scope, &args, 0, "callback_query: arg0 [ticket] not found or invalid");
+    let ticket = get_string_arg(scope, &args, 0, Some("callback_query: arg0 [ticket] not found or invalid"));
     if ticket.is_none() {
         return;
     }
     let mut ticket = ticket.unwrap();
 
-    let query = get_string_arg(scope, &args, 1, "callback_query: arg1 [query] not found or invalid");
+    let query = get_string_arg(scope, &args, 1, Some("callback_query: arg1 [query] not found or invalid"));
     if query.is_none() {
         return;
     }
@@ -185,19 +193,19 @@ pub fn fn_callback_query(scope: &mut v8::HandleScope, args: v8::FunctionCallback
 
     let mut query = FTQuery::new_with_ticket(&ticket, &query.unwrap());
     if args.length() > 2 {
-        sort = get_string_arg(scope, &args, 2, "callback_query: arg2 [sort] not found or invalid");
+        sort = get_string_arg(scope, &args, 2, Some("callback_query: arg2 [sort] not found or invalid"));
         query.sort = sort.unwrap_or_default();
         if args.length() > 3 {
-            databases = get_string_arg(scope, &args, 3, "callback_query: arg3 [databases] not found or invalid");
+            databases = get_string_arg(scope, &args, 3, Some("callback_query: arg3 [databases] not found or invalid"));
             query.databases = databases.unwrap_or_default();
             if args.length() > 4 {
-                top = get_string_i32(scope, &args, 4, "callback_query: arg4 [top] not found or invalid");
+                top = get_string_i32(scope, &args, 4, Some("callback_query: arg4 [top] not found or invalid"));
                 query.top = top.unwrap_or(100000);
                 if args.length() > 5 {
-                    limit = get_string_i32(scope, &args, 5, "callback_query: arg5 [limit] not found or invalid");
+                    limit = get_string_i32(scope, &args, 5, Some("callback_query: arg5 [limit] not found or invalid"));
                     query.limit = limit.unwrap_or(100000);
                     if args.length() > 6 {
-                        from = get_string_i32(scope, &args, 6, "callback_query: arg6 [from] not found or invalid");
+                        from = get_string_i32(scope, &args, 6, Some("callback_query: arg6 [from] not found or invalid"));
                         query.from = from.unwrap_or_default();
                     }
                 }
@@ -219,7 +227,7 @@ pub fn fn_callback_query(scope: &mut v8::HandleScope, args: v8::FunctionCallback
 }
 
 fn fn_callback_update(opt: IndvOp, scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut rv: v8::ReturnValue) {
-    let wticket = get_string_arg(scope, &args, 0, "fn_callback_update: arg0 [ticket] not found or invalid");
+    let wticket = get_string_arg(scope, &args, 0, Some("fn_callback_update: arg0 [ticket] not found or invalid"));
     if wticket.is_none() {
         return;
     }
@@ -300,7 +308,7 @@ pub fn init_context_with_callback<'a>(scope: &mut HandleScope<'a, ()>) -> Local<
     v8::Context::new_from_template(scope, object_templ)
 }
 
-fn get_string_arg(scope: &mut v8::HandleScope, args: &v8::FunctionCallbackArguments, idx: i32, warn_msg: &str) -> Option<String> {
+fn get_string_arg(scope: &mut v8::HandleScope, args: &v8::FunctionCallbackArguments, idx: i32, warn_msg: Option<&str>) -> Option<String> {
     let arg = args.get(idx);
 
     if !arg.is_null_or_undefined() {
@@ -309,14 +317,18 @@ fn get_string_arg(scope: &mut v8::HandleScope, args: &v8::FunctionCallbackArgume
         }
     }
 
-    warn!("{}", warn_msg);
+    if let Some(msg) = warn_msg {
+        warn!("{}", msg);
+    }
     None
 }
 
-fn get_string_i32(scope: &mut v8::HandleScope, args: &v8::FunctionCallbackArguments, idx: i32, err_msg: &str) -> Option<i32> {
+fn get_string_i32(scope: &mut v8::HandleScope, args: &v8::FunctionCallbackArguments, idx: i32, warn_msg: Option<&str>) -> Option<i32> {
     let arg = args.get(idx).int32_value(scope);
     if arg.is_none() {
-        error!("{}", err_msg);
+        if let Some(msg) = warn_msg {
+            warn!("{}", msg);
+        }
         return None;
     }
     arg

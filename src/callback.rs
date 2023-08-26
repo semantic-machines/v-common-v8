@@ -2,7 +2,7 @@ use crate::common::*;
 use crate::session_cache::*;
 use std::cell::RefCell;
 use std::sync::Mutex;
-use v8::{Context, HandleScope, Local};
+use v8::{Context, GetPropertyNamesArgs, HandleScope, Local};
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module_impl::Module;
 use v_common::module::remote_indv_r_storage::get_individual;
@@ -92,7 +92,7 @@ pub fn fn_callback_get_individuals(scope: &mut v8::HandleScope, args: v8::Functi
     let arg1 = args.get(1);
     if arg1.is_array() {
         if let Some(r) = arg1.to_object(scope) {
-            if let Some(arr_keys) = r.get_property_names(scope) {
+            if let Some(arr_keys) = r.get_property_names(scope, GetPropertyNamesArgs::default()) {
                 let mut sh_tnx = G_TRANSACTION.lock().unwrap();
                 let tnx = sh_tnx.get_mut();
 

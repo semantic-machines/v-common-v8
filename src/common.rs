@@ -6,7 +6,7 @@ use std::fs::DirEntry;
 use std::path::Path;
 use std::sync::Mutex;
 use std::{fs, io};
-use v8::HandleScope;
+use v8::{GetPropertyNamesArgs, HandleScope};
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto_impl::Onto;
@@ -94,7 +94,7 @@ pub fn v8obj_into_individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<
     let type_key = str_2_v8(scope, "type");
     let lang_key = str_2_v8(scope, "lang");
 
-    if let Some(j_predicates) = v8_obj.get_property_names(scope) {
+    if let Some(j_predicates) = v8_obj.get_property_names(scope, GetPropertyNamesArgs::default()) {
         for idx in 0..j_predicates.length() {
             let j_idx = v8::Integer::new(scope, idx as i32);
             let key = j_predicates.get(scope, j_idx.into()).unwrap();
@@ -110,7 +110,7 @@ pub fn v8obj_into_individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<
                 if let Some(resources) = val.to_object(scope) {
                     if !resources.is_array() {
                         add_v8_value_obj_to_individual(scope, &predicate, resources, res, data_key, type_key, lang_key);
-                    } else if let Some(key_list) = resources.get_property_names(scope) {
+                    } else if let Some(key_list) = resources.get_property_names(scope, GetPropertyNamesArgs::default()) {
                         for resources_idx in 0..key_list.length() {
                             let j_resources_idx = v8::Integer::new(scope, resources_idx as i32);
                             if let Some(v) = resources.get(scope, j_resources_idx.into()) {
@@ -137,8 +137,8 @@ pub fn v8obj_into_individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<
     }
 }
 
-fn add_v8_value_obj_to_individual<'a>(
-    scope: &mut HandleScope<'a>,
+fn add_v8_value_obj_to_individual(
+    scope: &mut HandleScope<'_>,
     predicate: &str,
     resource: v8::Local<v8::Object>,
     res: &mut Individual,

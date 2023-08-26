@@ -47,17 +47,21 @@ impl<'a, T: Default> ScriptInfo<'a, T> {
         }
     }
 
-    pub fn compile_script(&mut self, js_name: &str, parent_scope: &mut HandleScope<'a>) {
-        let source = str_2_v8(parent_scope, &self.str_script);
-        let name = v8::String::new(parent_scope, js_name).unwrap();
-        let origin = script_origin(parent_scope, name);
+    pub fn compile_script(&mut self, js_name: &str, scope: &mut HandleScope<'a>) {
+        let source = str_2_v8(scope, &self.str_script);
+        let name = v8::String::new(scope, js_name).unwrap();
+        let origin = script_origin(scope, name);
 
-        match v8::Script::compile(parent_scope, source, Some(&origin)) {
+        let mut tc_scope = v8::TryCatch::new(scope);
+        match v8::Script::compile(&mut tc_scope, source, Some(&origin)) {
             Some(script) => {
                 self.compiled_script = Some(script);
             },
             None => {
-                error!("fail compile script {}", self.str_script);
+                let exc = tc_scope.exception().unwrap();
+                let exc_str = v8_2_str(&mut tc_scope, &exc);
+
+                error!("fail compile script, err={}, source={}", exc_str, self.str_script);
                 self.compiled_script = None;
             },
         }

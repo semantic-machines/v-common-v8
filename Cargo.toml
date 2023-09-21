@@ -1,6 +1,6 @@
 [package]
 name = "v-common-v8"
-version = "0.1.125"
+version = "0.1.126"
 authors = ["Itiua <ValeriyBushenev@gmail.com>"]
 edition = "2018"
 description = "common part of the veda platform"
@@ -11,11 +11,11 @@ path = "src/lib.rs"
 
 [dependencies]
 # sudo apt install libglib2.0-dev
-v8 = "=0.75.1"
+v8 = "=0.77.0"
 log = "0.4"
 chrono = "0.4"
 lazy_static = "1.4.0"
-rust_decimal = "1.7.0"
+rust_decimal = "1.32.0"
 
 warp = { version = "0.3.3", features = ["tls"] }
 uuid = { version = "0.8.1", features = ["v4"] }
@@ -25,5 +25,5 @@ tokio = { version = "0.2", features = ["full"] }
 anyhow = "1.0.32"
 align-data = "0.1.0"
 
-v_common = { package = "v-common", version = "=0.4.54" }
+v_common = { package = "v-common", version = "=0.4.57" }
 #v_common = { package = "v-common", path = "../v-common" }

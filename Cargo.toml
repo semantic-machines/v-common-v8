@@ -1,6 +1,6 @@
 [package]
 name = "v-common-v8"
-version = "0.1.126"
+version = "0.1.127"
 authors = ["Itiua <ValeriyBushenev@gmail.com>"]
 edition = "2018"
 description = "common part of the veda platform"

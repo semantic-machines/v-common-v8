@@ -53,15 +53,15 @@ pub fn fn_callback_get_rights(scope: &mut v8::HandleScope, args: v8::FunctionCal
 }
 
 pub fn fn_callback_get_individual(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments, mut rv: v8::ReturnValue) {
-    //let ticket = get_string_arg(&mut scope, &args, 0, "callback_get_individual: ticket not found or invalid").unwrap_or_default();
     let id = get_string_arg(scope, &args, 1, Some("callback_get_individual: id not found or invalid")).unwrap_or_default();
 
     if id == "undefined" {
+        // Do nothing
     } else if id.starts_with('$') {
         let mut sh_g_vars = G_VARS.lock().unwrap();
         let g_vars = sh_g_vars.get_mut();
 
-        if let Some(indv) = &mut g_vars.g_key2indv.get_mut(&id) {
+        if let Some(indv) = g_vars.g_key2indv.get_mut(&id) {
             let j_indv = individual2v8obj(scope, indv.parse_all());
             rv.set(j_indv.into());
         }
@@ -73,12 +73,32 @@ pub fn fn_callback_get_individual(scope: &mut v8::HandleScope, args: v8::Functio
         if let Some(indv) = tnx.get_indv(&id) {
             let j_indv = individual2v8obj(scope, indv);
             rv.set(j_indv.into());
-        } else if let Some(mut indv) = get_individual(&id) {
-            if parse_raw(&mut indv).is_ok() {
-                let j_indv = individual2v8obj(scope, indv.parse_all());
-                rv.set(j_indv.into());
-            } else {
-                error!("callback_get_individual: fail parse binobj, id={}", id);
+        } else {
+            match get_individual(&id) {
+                Ok(Some(mut indv)) => {
+                    if parse_raw(&mut indv).is_ok() {
+                        let j_indv = individual2v8obj(scope, indv.parse_all());
+                        rv.set(j_indv.into());
+                    } else {
+                        let error_msg = format!("Failed to parse binobj for id: {}", id);
+                        error!("callback_get_individual: {}", error_msg);
+                        let error_string = v8::String::new(scope, &error_msg).unwrap();
+                        let error = v8::Exception::error(scope, error_string);
+                        scope.throw_exception(error);
+                    }
+                },
+                Ok(None) => {
+                    let warn_msg = format!("Individual not found for id: {}", id);
+                    warn!("callback_get_individual: {}", warn_msg);
+                    rv.set(v8::undefined(scope).into());
+                },
+                Err(e) => {
+                    let error_msg = format!("Error getting individual for id: {}, error: {:?}", id, e);
+                    error!("callback_get_individual: {}", error_msg);
+                    let error_string = v8::String::new(scope, &error_msg).unwrap();
+                    let error = v8::Exception::error(scope, error_string);
+                    scope.throw_exception(error);
+                },
             }
         }
 
@@ -104,12 +124,34 @@ pub fn fn_callback_get_individuals(scope: &mut v8::HandleScope, args: v8::Functi
                     if let Some(indv) = tnx.get_indv(&id) {
                         let j_indv = individual2v8obj(scope, indv);
                         j_res.set(scope, j_idx.into(), j_indv.into());
-                    } else if let Some(mut indv) = get_individual(&id) {
-                        if parse_raw(&mut indv).is_ok() {
-                            let j_indv = individual2v8obj(scope, indv.parse_all());
-                            j_res.set(scope, j_idx.into(), j_indv.into());
-                        } else {
-                            error!("callback_get_individual: fail parse binobj, id={}", id);
+                    } else {
+                        match get_individual(&id) {
+                            Ok(Some(mut indv)) => {
+                                if parse_raw(&mut indv).is_ok() {
+                                    let j_indv = individual2v8obj(scope, indv.parse_all());
+                                    j_res.set(scope, j_idx.into(), j_indv.into());
+                                } else {
+                                    let error_msg = format!("Failed to parse binobj for id: {}", id);
+                                    error!("callback_get_individuals: {}", error_msg);
+                                    let error_string = v8::String::new(scope, &error_msg).unwrap();
+                                    let error = v8::Exception::error(scope, error_string);
+                                    scope.throw_exception(error);
+                                    return;
+                                }
+                            },
+                            Ok(None) => {
+                                warn!("callback_get_individuals: individual not found, id={}", id);
+                                let null_value = v8::null(scope);
+                                j_res.set(scope, j_idx.into(), null_value.into());
+                            },
+                            Err(e) => {
+                                let error_msg = format!("Error getting individual, id={}, error={:?}", id, e);
+                                error!("callback_get_individuals: {}", error_msg);
+                                let error_string = v8::String::new(scope, &error_msg).unwrap();
+                                let error = v8::Exception::error(scope, error_string);
+                                scope.throw_exception(error);
+                                return;
+                            },
                         }
                     }
                 }
@@ -117,7 +159,12 @@ pub fn fn_callback_get_individuals(scope: &mut v8::HandleScope, args: v8::Functi
             }
         }
     } else {
-        error!("callback_get_individuals: arg is not array");
+        let error_msg = "Argument is not an array";
+        error!("callback_get_individuals: {}", error_msg);
+        let error_string = v8::String::new(scope, error_msg).unwrap();
+        let error = v8::Exception::type_error(scope, error_string);
+        scope.throw_exception(error);
+        return;
     }
     rv.set(j_res.into());
 }

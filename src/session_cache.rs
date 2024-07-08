@@ -6,6 +6,7 @@ use v_common::module::veda_backend::indv_apply_cmd;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto_impl::Onto;
 use v_common::onto::parser::parse_raw;
+use v_common::v_api::api_client::UpdateOptions;
 use v_common::v_api::api_client::{IndvOp, MStorageClient, ALL_MODULES};
 use v_common::v_api::obj::ResultCode;
 
@@ -120,6 +121,7 @@ impl Transaction {
         };
 
         if ti.cmd == IndvOp::Remove {
+            // No changes needed for Remove operation
         } else {
             ti.uri = ti.indv.get_id().to_string();
 
@@ -130,22 +132,35 @@ impl Transaction {
                     indv_apply_cmd(&ti.cmd, prev_indv, &mut ti.indv);
                     debug!("{:?} AFTER: {}", ti.cmd, &prev_indv);
                     ti.indv = Individual::new_from_obj(prev_indv.get_obj());
-                } else if let Some(mut prev_indv) = get_individual(ti.indv.get_id()) {
-                    if parse_raw(&mut prev_indv).is_ok() {
-                        prev_indv.parse_all();
-                        debug!("{:?} BEFORE: {}", ti.cmd, &prev_indv);
-                        debug!("{:?} APPLY: {}", ti.cmd, &ti.indv);
-                        indv_apply_cmd(&ti.cmd, &mut prev_indv, &mut ti.indv);
-                        debug!("{:?} AFTER: {}", ti.cmd, &prev_indv);
-                        ti.indv = prev_indv;
-                    } else {
-                        ti.rc = ResultCode::UnprocessableEntity;
-                    }
                 } else {
-                    ti.rc = ResultCode::UnprocessableEntity;
+                    match get_individual(ti.indv.get_id()) {
+                        Ok(Some(mut prev_indv)) => {
+                            if parse_raw(&mut prev_indv).is_ok() {
+                                prev_indv.parse_all();
+                                debug!("{:?} BEFORE: {}", ti.cmd, &prev_indv);
+                                debug!("{:?} APPLY: {}", ti.cmd, &ti.indv);
+                                indv_apply_cmd(&ti.cmd, &mut prev_indv, &mut ti.indv);
+                                debug!("{:?} AFTER: {}", ti.cmd, &prev_indv);
+                                ti.indv = prev_indv;
+                            } else {
+                                ti.rc = ResultCode::UnprocessableEntity;
+                            }
+                        },
+                        Ok(None) => {
+                            // Individual not found
+                            ti.rc = ResultCode::NotFound;
+                        },
+                        Err(e) => {
+                            // Error occurred while getting individual
+                            error!("Error getting individual: {:?}", e);
+                            ti.rc = e;
+                        },
+                    }
                 }
 
-                ti.cmd = IndvOp::Put;
+                if ti.rc == ResultCode::Ok {
+                    ti.cmd = IndvOp::Put;
+                }
             }
         }
 
@@ -174,7 +189,14 @@ pub fn commit(tnx: &Transaction, api_client: &mut MStorageClient) -> ResultCode 
         }
 
         debug!("commit {}", &ti.indv);
-        match api_client.update_use_param(&ti.ticket_id, &tnx.event_id, &tnx.src, ALL_MODULES, ti.cmd.clone(), &ti.indv) {
+        let update_options = UpdateOptions {
+            event_id: Some(&tnx.event_id),
+            src: Some(&tnx.src),
+            assigned_subsystems: Some(ALL_MODULES),
+            addr: None,
+        };
+
+        match api_client.update(&ti.indv, &ti.ticket_id, ti.cmd.clone(), update_options) {
             Ok(res) => {
                 if res.result != ResultCode::Ok {
                     error!("commit: op_id={}, code={:?}", res.op_id, res.result);

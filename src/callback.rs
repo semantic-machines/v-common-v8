@@ -6,12 +6,13 @@ use v8::{Context, GetPropertyNamesArgs, HandleScope, Local};
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module_impl::Module;
 use v_common::module::remote_indv_r_storage::get_individual;
-use v_common::onto::individual::Individual;
-use v_common::onto::parser::parse_raw;
 use v_common::search::common::FTQuery;
 use v_common::search::ft_client::*;
 use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::common_type::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext, ACCESS_8_LIST, ACCESS_PREDICATE_LIST};
+use v_individual_model::onto::individual::Individual;
+use v_individual_model::onto::parser::parse_raw;
 
 lazy_static! {
     static ref AZ: Mutex<RefCell<LmdbAzContext>> = Mutex::new(RefCell::new(LmdbAzContext::new(1000)));
@@ -75,7 +76,7 @@ pub fn fn_callback_get_individual(scope: &mut v8::HandleScope, args: v8::Functio
             rv.set(j_indv.into());
         } else {
             match get_individual(&id) {
-                Ok(Some(mut indv)) => {
+                Some(mut indv) => {
                     if parse_raw(&mut indv).is_ok() {
                         let j_indv = individual2v8obj(scope, indv.parse_all());
                         rv.set(j_indv.into());
@@ -87,17 +88,10 @@ pub fn fn_callback_get_individual(scope: &mut v8::HandleScope, args: v8::Functio
                         scope.throw_exception(error);
                     }
                 },
-                Ok(None) => {
+                None => {
                     let warn_msg = format!("Individual not found for id: {}", id);
                     warn!("callback_get_individual: {}", warn_msg);
                     rv.set(v8::undefined(scope).into());
-                },
-                Err(e) => {
-                    let error_msg = format!("Error getting individual for id: {}, error: {:?}", id, e);
-                    error!("callback_get_individual: {}", error_msg);
-                    let error_string = v8::String::new(scope, &error_msg).unwrap();
-                    let error = v8::Exception::error(scope, error_string);
-                    scope.throw_exception(error);
                 },
             }
         }
@@ -126,7 +120,7 @@ pub fn fn_callback_get_individuals(scope: &mut v8::HandleScope, args: v8::Functi
                         j_res.set(scope, j_idx.into(), j_indv.into());
                     } else {
                         match get_individual(&id) {
-                            Ok(Some(mut indv)) => {
+                            Some(mut indv) => {
                                 if parse_raw(&mut indv).is_ok() {
                                     let j_indv = individual2v8obj(scope, indv.parse_all());
                                     j_res.set(scope, j_idx.into(), j_indv.into());
@@ -139,18 +133,10 @@ pub fn fn_callback_get_individuals(scope: &mut v8::HandleScope, args: v8::Functi
                                     return;
                                 }
                             },
-                            Ok(None) => {
+                            None => {
                                 warn!("callback_get_individuals: individual not found, id={}", id);
                                 let null_value = v8::null(scope);
                                 j_res.set(scope, j_idx.into(), null_value.into());
-                            },
-                            Err(e) => {
-                                let error_msg = format!("Error getting individual, id={}, error={:?}", id, e);
-                                error!("callback_get_individuals: {}", error_msg);
-                                let error_string = v8::String::new(scope, &error_msg).unwrap();
-                                let error = v8::Exception::error(scope, error_string);
-                                scope.throw_exception(error);
-                                return;
                             },
                         }
                     }
@@ -220,8 +206,8 @@ pub fn fn_callback_query(scope: &mut v8::HandleScope, args: v8::FunctionCallback
     }
     let mut ticket = ticket.unwrap();
 
-    let query = get_string_arg(scope, &args, 1, Some("callback_query: arg1 [query] not found or invalid"));
-    if query.is_none() {
+    let query_str = get_string_arg(scope, &args, 1, Some("callback_query: arg1 [query] not found or invalid"));
+    if query_str.is_none() {
         return;
     }
 
@@ -238,7 +224,7 @@ pub fn fn_callback_query(scope: &mut v8::HandleScope, args: v8::FunctionCallback
         drop(sh_tnx);
     }
 
-    let mut query = FTQuery::new_with_ticket(&ticket, &query.unwrap());
+    let mut query = FTQuery::new_with_ticket(&ticket, &query_str.clone().unwrap());
     if args.length() > 2 {
         sort = get_string_arg(scope, &args, 2, Some("callback_query: arg2 [sort] not found or invalid"));
         query.sort = sort.unwrap_or_default();
@@ -269,6 +255,10 @@ pub fn fn_callback_query(scope: &mut v8::HandleScope, args: v8::FunctionCallback
 
     drop(sh_ft_client);
 
+    if res.result_code != ResultCode::Ok {
+        warn!("callback query: {}, result code = {:?}", query_str.unwrap(), res.result_code);
+    }
+    
     let j_res = query_result2v8obj(scope, &res);
     rv.set(j_res.into());
 }

@@ -7,11 +7,11 @@ use std::path::Path;
 use std::sync::Mutex;
 use std::{fs, io};
 use v8::{GetPropertyNamesArgs, HandleScope};
-use v_common::onto::datatype::Lang;
-use v_common::onto::individual::Individual;
-use v_common::onto::onto_impl::Onto;
-use v_common::onto::resource::Value;
 use v_common::search::common::QueryResult;
+use v_individual_model::onto::datatype::Lang;
+use v_individual_model::onto::individual::Individual;
+use v_individual_model::onto::onto_impl::Onto;
+use v_individual_model::onto::resource::Value;
 
 pub struct HashVec<String> {
     pub hash: HashSet<String>,

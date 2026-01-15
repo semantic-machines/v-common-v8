@@ -11,7 +11,6 @@ use std::path::Path;
 use v8::{Context, HandleScope, Isolate, Local};
 use v_common::module::module_impl::Module;
 use v_common::module::veda_backend::Backend;
-use v_common::storage::common::StorageMode;
 
 pub fn script_origin<'a>(s: &mut v8::HandleScope<'a>, resource_name: v8::Local<'a, v8::String>) -> v8::ScriptOrigin<'a> {
     let resource_line_offset = 0;
@@ -153,7 +152,7 @@ impl<'a, T: Default> ScriptsWorkPlace<'a, T> {
         Self {
             scripts: Default::default(),
             scripts_order: vec![],
-            backend: Backend::create(StorageMode::ReadOnly, false),
+            backend: Backend::default(),
             scope,
             context,
         }

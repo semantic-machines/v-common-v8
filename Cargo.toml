@@ -1,6 +1,6 @@
 [package]
 name = "v-common-v8"
-version = "0.1.132"
+version = "0.1.133"
 authors = ["Itiua <ValeriyBushenev@gmail.com>"]
 edition = "2018"
 description = "common part of the veda platform"
@@ -21,9 +21,12 @@ warp = { version = "0.3.3", features = ["tls"] }
 uuid = { version = "0.8.1", features = ["v4"] }
 serde_json = { version = "1.0.57", features = ["preserve_order"] }
 futures = "0.3.5"
-tokio = { version = "0.2", features = ["full"] }
+#tokio = { version = "0.2", features = ["full"] }
 anyhow = "1.0.32"
 align-data = "0.1.0"
 
-v_common = { package = "v-common", version = "=0.12.0" }
-#v_common = { package = "v-common", path = "../v-common" }
+v_common = { package = "v-common", version = "=0.17.6", features = ["tokio_0_2", "tt_2", "awc_2"] }
+#v_common = { package = "v-common", path = "../../../v-common", features = ["tokio_0_2", "tt_2", "awc_2"]}
+
+v-individual-model = "0.2.6"
+#v-individual-model = { package = "v-individual-model", path = "../../../v-individual-model"}

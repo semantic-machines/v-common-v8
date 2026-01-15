@@ -3,12 +3,11 @@ use std::string::ToString;
 
 use v_common::module::remote_indv_r_storage::get_individual;
 use v_common::module::veda_backend::indv_apply_cmd;
-use v_common::onto::individual::Individual;
-use v_common::onto::onto_impl::Onto;
-use v_common::onto::parser::parse_raw;
-use v_common::v_api::api_client::UpdateOptions;
 use v_common::v_api::api_client::{IndvOp, MStorageClient, ALL_MODULES};
-use v_common::v_api::obj::ResultCode;
+use v_common::v_api::common_type::ResultCode;
+use v_individual_model::onto::individual::Individual;
+use v_individual_model::onto::onto_impl::Onto;
+use v_individual_model::onto::parser::parse_raw;
 
 #[derive(Default)]
 pub struct CallbackSharedData {
@@ -42,7 +41,7 @@ impl CallbackSharedData {
     }
 
     pub fn set_g_super_classes(&mut self, indv_types: &[String], onto: &Onto) {
-        let mut super_classes = HashSet::new();
+        let mut super_classes: HashSet<String> = HashSet::new();
 
         for indv_type in indv_types.iter() {
             onto.get_supers(indv_type, &mut super_classes);
@@ -134,7 +133,7 @@ impl Transaction {
                     ti.indv = Individual::new_from_obj(prev_indv.get_obj());
                 } else {
                     match get_individual(ti.indv.get_id()) {
-                        Ok(Some(mut prev_indv)) => {
+                        Some(mut prev_indv) => {
                             if parse_raw(&mut prev_indv).is_ok() {
                                 prev_indv.parse_all();
                                 debug!("{:?} BEFORE: {}", ti.cmd, &prev_indv);
@@ -146,14 +145,9 @@ impl Transaction {
                                 ti.rc = ResultCode::UnprocessableEntity;
                             }
                         },
-                        Ok(None) => {
+                        None => {
                             // Individual not found
                             ti.rc = ResultCode::NotFound;
-                        },
-                        Err(e) => {
-                            // Error occurred while getting individual
-                            error!("Error getting individual: {:?}", e);
-                            ti.rc = e;
                         },
                     }
                 }
@@ -189,14 +183,8 @@ pub fn commit(tnx: &Transaction, api_client: &mut MStorageClient) -> ResultCode 
         }
 
         debug!("commit {}", &ti.indv);
-        let update_options = UpdateOptions {
-            event_id: Some(&tnx.event_id),
-            src: Some(&tnx.src),
-            assigned_subsystems: Some(ALL_MODULES),
-            addr: None,
-        };
 
-        match api_client.update(&ti.indv, &ti.ticket_id, ti.cmd.clone(), update_options) {
+        match api_client.update_use_param(&ti.ticket_id, &tnx.event_id, &tnx.src, ALL_MODULES, ti.cmd.clone(), &ti.indv) {
             Ok(res) => {
                 if res.result != ResultCode::Ok {
                     error!("commit: op_id={}, code={:?}", res.op_id, res.result);

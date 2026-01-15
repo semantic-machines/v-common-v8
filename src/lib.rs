@@ -11,3 +11,5 @@ pub mod session_cache;
 
 pub use v8;
 pub use v_common;
+pub use v_individual_model;
+pub use v_storage;
